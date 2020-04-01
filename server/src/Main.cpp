@@ -37,7 +37,7 @@ public:
 		spdlog::info("World::update, sockets: {}", sockets_.size());
 	}
 private:
-	explicit World() : socket_manager() {}
+	World() : socket_manager() {}
 };
 
 int main(int argc, char* argv[])
