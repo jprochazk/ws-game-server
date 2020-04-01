@@ -17,6 +17,7 @@ public:
 	void close_socket(uint16_t id);
 	void update_sockets();
 	void process_packets();
+	void broadcast(std::vector<uint8_t> payload);
 protected:
 	std::mutex sockets_lock_;
 	std::unordered_map<uint16_t, std::shared_ptr<websocket>> sockets_;

@@ -41,3 +41,13 @@ void socket_manager::process_packets()
 		}
 	}
 }
+
+void socket_manager::broadcast(std::vector<uint8_t> payload)
+{
+	// Send a message to every session
+	auto message = std::make_shared<std::vector<uint8_t>>(std::move(payload));
+	std::lock_guard<std::mutex> lock(sockets_lock_);
+	for (auto itr = sockets_.begin(); itr != sockets_.end(); itr++) {
+		itr->second->send(*message);
+	}
+}

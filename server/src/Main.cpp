@@ -36,15 +36,6 @@ public:
 		// TODO: update entities, scripts, ...
 		spdlog::info("World::update, sockets: {}", sockets_.size());
 	}
-
-	// Send a message to every session
-	void broadcast(std::vector<uint8_t> payload) {
-		auto message = std::make_shared<std::vector<uint8_t>>(std::move(payload));
-		std::lock_guard<std::mutex> lock(sockets_lock_);
-		for (auto itr = sockets_.begin(); itr != sockets_.end(); itr++) {
-			itr->second->send(*message);
-		}
-	}
 private:
 	explicit World() : socket_manager() {}
 };

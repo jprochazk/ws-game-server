@@ -42,13 +42,13 @@ void websocket::close(beast::websocket::close_reason cr)
 }
 
 void websocket::send(
-	std::vector<uint8_t> const message
+	std::vector<uint8_t> const payload
 ) {
 	if (should_close_) return;
 
 	boost::asio::post(
 		ws_.get_executor(),
-		beast::bind_front_handler(&websocket::on_send, shared_from_this(), message)
+		beast::bind_front_handler(&websocket::on_send, shared_from_this(), payload)
 	);
 }
 
@@ -114,11 +114,12 @@ void websocket::on_read(
 	);
 }
 
-void websocket::on_send(std::vector<uint8_t> message) 
+void websocket::on_send(std::vector<uint8_t> payload)
 {
 	if (should_close_) return;
 
-	write_queue_.push_back(message);
+	write_queue_.push_back(payload);
+
 	if (is_writing_async_) return;
 
 	is_writing_async_ = true;
