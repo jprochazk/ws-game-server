@@ -4,7 +4,7 @@
 websocket::websocket(
 	boost::asio::ip::tcp::socket&& socket
 ) : ws_(std::move(socket)),
-	write_lock_(), write_queue_(), is_writing_async_(false),
+	write_queue_(), is_writing_async_(false),
 	recv_lock_(), recv_queue_(),
 	should_close_(false)
 {
@@ -45,11 +45,10 @@ void websocket::send(
 	std::vector<uint8_t> const message
 ) {
 	if (should_close_) return;
-	write_queue_.push_back(message);
 
 	boost::asio::post(
 		ws_.get_executor(),
-		beast::bind_front_handler(&websocket::on_send, shared_from_this())
+		beast::bind_front_handler(&websocket::on_send, shared_from_this(), message)
 	);
 }
 
@@ -115,9 +114,11 @@ void websocket::on_read(
 	);
 }
 
-void websocket::on_send() 
+void websocket::on_send(std::vector<uint8_t> message) 
 {
 	if (should_close_) return;
+
+	write_queue_.push_back(message);
 	if (is_writing_async_) return;
 
 	is_writing_async_ = true;

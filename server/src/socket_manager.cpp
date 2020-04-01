@@ -10,8 +10,9 @@ void socket_manager::add_socket(std::shared_ptr<websocket> socket)
 void socket_manager::close_socket(uint16_t id) {
 	std::lock_guard<std::mutex> lock(sockets_lock_);
 	if (auto socket = sockets_[id]) {
-
+		socket->close(beast::websocket::close_code::normal);
 	}
+	sockets_.erase(id);
 }
 
 void socket_manager::update_sockets()
@@ -20,7 +21,7 @@ void socket_manager::update_sockets()
 	auto itr = sockets_.begin();
 	while (itr != sockets_.end()) {
 		if (itr->second->should_close()) {
-			itr->second->close(beast::websocket::close_code::none);
+			itr->second->close(beast::websocket::close_code::normal);
 			itr = sockets_.erase(itr);
 		}
 		else {
@@ -34,10 +35,9 @@ void socket_manager::process_packets()
 	std::lock_guard<std::mutex> lock(sockets_lock_);
 	for (auto itr = sockets_.begin(); itr != sockets_.end(); itr++) {
 		auto received_packets = itr->second->get_packets();
-		// handle packets
 		for (auto& packet : received_packets) {
-			// for now, just log
-			spdlog::info("received data {} from session num {}", packet.size(), itr->first);
+			// @temp only log the size of packet and which socket it came from
+			spdlog::info("received data {} from socket num {}", packet.size(), itr->first);
 		}
 	}
 }

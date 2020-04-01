@@ -15,7 +15,6 @@ class websocket : public std::enable_shared_from_this<websocket>
 private:
 	beast::websocket::stream<beast::tcp_stream> ws_;
 	beast::flat_buffer buffer_;
-	std::mutex write_lock_;
 	std::vector<std::vector<uint8_t>> write_queue_;
 	std::mutex recv_lock_;
 	std::vector<std::vector<uint8_t>> recv_queue_;
@@ -34,7 +33,7 @@ public:
 private:
 	void on_accept(beast::error_code ec);
 	void on_read(beast::error_code ec, std::size_t bytes_transferred);
-	void on_send();
+	void on_send(std::vector<uint8_t> message);
 	void on_write(beast::error_code ec, std::size_t bytes_transferred);
 }; // class websocket
 
