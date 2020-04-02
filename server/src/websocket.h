@@ -10,7 +10,7 @@
 
 namespace beast = boost::beast;
 
-class websocket : public std::enable_shared_from_this<websocket>
+class websocket
 {
 private:
 	beast::websocket::stream<beast::tcp_stream> ws_;

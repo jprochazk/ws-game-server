@@ -25,7 +25,7 @@ void websocket::run()
 		)
 	);
 	ws_.async_accept(
-		beast::bind_front_handler(&websocket::on_accept, shared_from_this())
+		beast::bind_front_handler(&websocket::on_accept, this)
 	);
 }
 
@@ -48,7 +48,7 @@ void websocket::send(
 
 	boost::asio::post(
 		ws_.get_executor(),
-		beast::bind_front_handler(&websocket::on_send, shared_from_this(), payload)
+		beast::bind_front_handler(&websocket::on_send, this, payload)
 	);
 }
 
@@ -76,7 +76,7 @@ void websocket::on_accept(beast::error_code ec)
 
 	ws_.async_read(
 		buffer_,
-		beast::bind_front_handler(&websocket::on_read, shared_from_this())
+		beast::bind_front_handler(&websocket::on_read, this)
 	);
 }
 
@@ -110,7 +110,7 @@ void websocket::on_read(
 
 	ws_.async_read(
 		buffer_,
-		beast::bind_front_handler(&websocket::on_read, shared_from_this())
+		beast::bind_front_handler(&websocket::on_read, this)
 	);
 }
 
@@ -126,7 +126,7 @@ void websocket::on_send(std::vector<uint8_t> payload)
 
 	ws_.async_write(
 		boost::asio::buffer(write_queue_.front()),
-		beast::bind_front_handler(&websocket::on_write, shared_from_this())
+		beast::bind_front_handler(&websocket::on_write, this)
 	);
 }
 
@@ -148,7 +148,7 @@ void websocket::on_write(
 			boost::asio::buffer(write_queue_.front()),
 			beast::bind_front_handler(
 				&websocket::on_write,
-				shared_from_this())
+				this)
 			);
 	}
 	else {

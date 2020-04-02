@@ -13,7 +13,7 @@
 
 class socket_manager {
 public:
-	void add_socket(std::shared_ptr <websocket> socket);
+	void add_socket(std::shared_ptr<websocket> socket);
 	void close_socket(uint16_t id);
 	void update_sockets();
 	void process_packets();

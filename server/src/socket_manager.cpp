@@ -9,7 +9,7 @@ void socket_manager::add_socket(std::shared_ptr<websocket> socket)
 
 void socket_manager::close_socket(uint16_t id) {
 	std::lock_guard<std::mutex> lock(sockets_lock_);
-	if (auto socket = sockets_[id]) {
+	if (auto socket = sockets_.find(id)->second) {
 		socket->close(beast::websocket::close_code::normal);
 	}
 	sockets_.erase(id);
