@@ -25,7 +25,7 @@ void websocket::run()
 		)
 	);
 	ws_.async_accept(
-		beast::bind_front_handler(&websocket::on_accept, this)
+		beast::bind_front_handler(&websocket::on_accept, shared_from_this())
 	);
 }
 
@@ -48,14 +48,58 @@ void websocket::send(
 
 	boost::asio::post(
 		ws_.get_executor(),
-		beast::bind_front_handler(&websocket::on_send, this, payload)
+		beast::bind_front_handler(&websocket::on_send, shared_from_this(), payload)
 	);
+}
+
+void websocket::on_send(std::vector<uint8_t> payload)
+{
+	if (should_close_) return;
+
+	write_queue_.push_back(payload);
+
+	if (is_writing_async_) return;
+
+	is_writing_async_ = true;
+
+	ws_.async_write(
+		boost::asio::buffer(write_queue_.front()),
+		beast::bind_front_handler(&websocket::on_write, shared_from_this())
+		);
+}
+
+void websocket::on_write(
+	beast::error_code ec,
+	std::size_t bytes_transferred
+) {
+	spdlog::info("async write");
+
+	if (should_close_) return;
+	if (ec) {
+		spdlog::error("{}: {}", "write", ec.message());
+		should_close_ = true;
+		return;
+	}
+
+	write_queue_.erase(write_queue_.begin());
+
+	if (!write_queue_.empty()) {
+		ws_.async_write(
+			boost::asio::buffer(write_queue_.front()),
+			beast::bind_front_handler(
+				&websocket::on_write,
+				shared_from_this())
+			);
+	}
+	else {
+		is_writing_async_ = false;
+	}
 }
 
 std::vector<std::vector<uint8_t>> websocket::get_packets() 
 {
 	if (should_close_) return {};
-	std::unique_lock<std::mutex> recv_lock(recv_lock_);
+	std::lock_guard<std::mutex> recv_lock(recv_lock_);
 
 	std::vector<std::vector<uint8_t>> buffer(
 		std::make_move_iterator(recv_queue_.begin()),
@@ -76,7 +120,7 @@ void websocket::on_accept(beast::error_code ec)
 
 	ws_.async_read(
 		buffer_,
-		beast::bind_front_handler(&websocket::on_read, this)
+		beast::bind_front_handler(&websocket::on_read, shared_from_this())
 	);
 }
 
@@ -96,7 +140,7 @@ void websocket::on_read(
 	}
 
 	{
-		std::unique_lock<std::mutex> lock(recv_lock_);
+		std::lock_guard<std::mutex> lock(recv_lock_);
 
 		std::vector<unsigned char> recv(buffer_.size());
 		boost::asio::buffer_copy(
@@ -110,50 +154,8 @@ void websocket::on_read(
 
 	ws_.async_read(
 		buffer_,
-		beast::bind_front_handler(&websocket::on_read, this)
+		beast::bind_front_handler(&websocket::on_read, shared_from_this())
 	);
-}
-
-void websocket::on_send(std::vector<uint8_t> payload)
-{
-	if (should_close_) return;
-
-	write_queue_.push_back(payload);
-
-	if (is_writing_async_) return;
-
-	is_writing_async_ = true;
-
-	ws_.async_write(
-		boost::asio::buffer(write_queue_.front()),
-		beast::bind_front_handler(&websocket::on_write, this)
-	);
-}
-
-void websocket::on_write(
-	beast::error_code ec,
-	std::size_t bytes_transferred
-) {
-	if (should_close_) return;
-	if (ec) {
-		spdlog::error("{}: {}", "write", ec.message());
-		should_close_ = true;
-		return;
-	}
-
-	write_queue_.erase(write_queue_.begin());
-
-	if (!write_queue_.empty()) {
-		ws_.async_write(
-			boost::asio::buffer(write_queue_.front()),
-			beast::bind_front_handler(
-				&websocket::on_write,
-				this)
-			);
-	}
-	else {
-		is_writing_async_ = false;
-	}
 }
 
 bool websocket::should_close() {

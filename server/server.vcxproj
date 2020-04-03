@@ -155,14 +155,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\socket_listener.cpp" />
-    <ClCompile Include="src\socket_manager.cpp" />
-    <ClCompile Include="src\websocket.cpp" />
+    <ClCompile Include="src\network\socket_listener.cpp" />
+    <ClCompile Include="src\network\socket_manager.cpp" />
+    <ClCompile Include="src\network\websocket.cpp" />
+    <ClCompile Include="src\world\World.cpp" />
+    <ClCompile Include="src\world\WorldSession.cpp" />
+    <ClCompile Include="src\world\WorldSocketMgr.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\socket_listener.h" />
-    <ClInclude Include="src\socket_manager.h" />
-    <ClInclude Include="src\websocket.h" />
+    <ClInclude Include="src\common\concurrentqueue.h" />
+    <ClInclude Include="src\network\socket_listener.h" />
+    <ClInclude Include="src\network\socket_manager.h" />
+    <ClInclude Include="src\network\websocket.h" />
+    <ClInclude Include="src\world\World.h" />
+    <ClInclude Include="src\world\WorldSession.h" />
+    <ClInclude Include="src\world\WorldSocketMgr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
