@@ -17,11 +17,10 @@ class websocket : public std::enable_shared_from_this<websocket>
 private:
 	beast::websocket::stream<beast::tcp_stream> ws_;
 	beast::flat_buffer buffer_;
-	std::mutex write_lock_;
 	std::vector<std::vector<uint8_t>> write_queue_;
 	std::mutex recv_lock_;
 	std::vector<std::vector<uint8_t>> recv_queue_;
-	std::atomic<bool> is_writing_async_;
+	bool is_writing_async_;
 
 	std::atomic<bool> should_close_;
 public:
