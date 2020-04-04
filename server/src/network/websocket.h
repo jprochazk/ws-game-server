@@ -15,7 +15,6 @@ namespace beast = boost::beast;
 class websocket : public std::enable_shared_from_this<websocket>
 {
 private:
-	std::mutex ws_lock_;
 	beast::websocket::stream<beast::tcp_stream> ws_;
 	beast::flat_buffer buffer_;
 	std::mutex write_lock_;

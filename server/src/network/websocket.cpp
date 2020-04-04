@@ -13,7 +13,6 @@ websocket::websocket(
 
 void websocket::run()
 {
-	std::lock_guard<std::mutex> lock(ws_lock_);
 	boost::asio::post(
 		ws_.get_executor(),
 		beast::bind_front_handler([&] {
@@ -49,7 +48,6 @@ void websocket::on_accept(beast::error_code ec)
 
 void websocket::close(beast::websocket::close_reason cr)
 {
-	std::lock_guard<std::mutex> lock(ws_lock_);
 	boost::asio::post(
 		ws_.get_executor(),
 		beast::bind_front_handler([&] {
@@ -67,7 +65,6 @@ void websocket::close(beast::websocket::close_reason cr)
 void websocket::send(
 	std::vector<uint8_t> const payload
 ) {
-	std::lock_guard<std::mutex> lock(ws_lock_);
 	boost::asio::post(
 		ws_.get_executor(),
 		beast::bind_front_handler(&websocket::on_send, shared_from_this(), payload)

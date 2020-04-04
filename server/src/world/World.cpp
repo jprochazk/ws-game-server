@@ -31,8 +31,8 @@ void World::Update()
 	// accept new connections, clear old ones
 	socket_mgr_->Update();
 
-	if (sessions_.size() > 0) {
-		sessions_[0]->Send({});
+	for (auto session : sessions_) {
+		session.second->Send({});
 	}
 
 	// TODO: update entities, scripts, ...
